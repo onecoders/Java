@@ -1,4 +1,4 @@
-package com.io;
+package com.filetest;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -9,14 +9,16 @@ import java.io.IOException;
 
 public class IOTest {
 
-	private static String PATH = "D:" + File.separator + "test.pdf";
-
-	private static void save(String str) {
+	private static void save(String str, String path) {
 		BufferedOutputStream bos = null;
+		File to = new File(path);
 		try {
-			bos = new BufferedOutputStream(new FileOutputStream(new File(PATH)));
+			if (!to.exists()) {
+				to.createNewFile();
+			}
+			bos = new BufferedOutputStream(new FileOutputStream(to));
 			bos.write(str.getBytes());
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			if (bos != null) {
@@ -29,16 +31,19 @@ public class IOTest {
 		}
 	}
 
-	private static void load() {
+	private static String load(String path) {
 		BufferedInputStream bis = null;
-		byte[] buffer = new byte[1024];
+		File from = new File(path);
+		if (!from.exists()) {
+			return null;
+		}
 		try {
-			bis = new BufferedInputStream(
-					new FileInputStream(new File(PATH)));
+			bis = new BufferedInputStream(new FileInputStream(from));
+			byte[] buffer = new byte[bis.available()];
 			int byteRead = 0;
 			while ((byteRead = bis.read(buffer)) != -1) {
 				String str = new String(buffer, 0, byteRead);
-				System.out.println(str + byteRead);
+				return str;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -51,12 +56,19 @@ public class IOTest {
 				}
 			}
 		}
+		return null;
+	}
+	
+	private static void copy(String from, String to){
+		save(load(from), to);
 	}
 
 	public static void main(String[] args) {
-		String str = "this is a test!";
-		save(str);
-		load();
+		String to = File.separator + "home" + File.separator
+				+ "silicon" + File.separator + "file.test";
+		String from = File.separator + "home" + File.separator
+				+ "silicon" + File.separator + "hello.txt";
+		copy(from, to);
 	}
 
 }
